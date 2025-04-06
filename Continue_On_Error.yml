@@ -1,0 +1,16 @@
+Continue on error:
+We can use IF command also but the difference is in if command if any Job failed overall it will show pipeline as failed but using continue on error if that job failed also pipeline will show successful.
+
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      script-file: ${{ steps.publish.outputs.script-file }}   # Passing the value {{steps.<id>.outputs.<any name>}}
+    steps:
+      - name: Get code
+        continue-on-error: true
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm ci
+      - name: Build website

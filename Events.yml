@@ -1,0 +1,50 @@
+Push:
+ This will trigger when pushed to workflow, even you can specify branch name also.on
+
+On: push
+  branches:
+    - main
+
+
+Pull Request:
+It's not like push and it will not trigger every time, you need to mention activity type to when it need to be triggered like below.
+Many activity types are there, refer Events that trigger workflows for activity types.
+
+
+on:
+  pull_request:
+    type:  
+      - opened         # this workflow will trigger when you created new pull request.
+  workflow_dispatch:   # multiple events can be used in this format
+
+
+Event Filters:
+We don't  need run all the workflows when we pushed/.. Something, we can control using event filters
+
+
+	1. Multiple branches:
+	
+	  push:
+	    branches:
+	      - main
+	      - dev-*    #This will include all the branch name startes with dev eg: dev-env
+	      - dev/**  #We need to ** for multiple folder like dev/name/yourname
+	
+	2. Paths:
+	
+	  push:
+	    paths:
+	    - '**.js'   #This worklow will run if any changes in .js files
+	3. Paths-ignore:
+	push:
+	    paths-ignore:
+	    - '**.js'   #this will ignore all js files, if any changes in js files workflow will not trigger
+	
+Refer Workflow syntax page for more ingo.
+
+
+
+Skipping workflows:
+If you just added small changes like comment in code and after that you don't want to re-trigger the workflow, then use below command while commiting
+
+Git commit -m "small change" [skip ci]

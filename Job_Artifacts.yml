@@ -1,0 +1,63 @@
+Upload Artifacts:
+Artifacts are the files, which we can pass to other jobs or we can access locally by downloading manually
+
+      - name: upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: my-files
+          path: |             #If we are specifying multiple paths then this pipe symbol is required
+            dist
+            package.json
+
+
+
+Download Artifacts:
+To share the files from one jobs to another, we need to download the uploaded artifacts
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: my-files
+      - name: List files
+        run: ls
+
+To Publish only .js files:
+If you don't need all files to pass to other job, you can specify command like below
+
+  build:
+    needs: test
+    runs-on: ubuntu-latest
+    outputs:
+      script-file: ${{ steps.publish.outputs.script-file }}   # Passing the value {{steps.<id>.outputs.<any name>}}
+    steps:
+      - name: Get code
+        uses: actions/checkout@v3
+      - name: Install dependencies
+        run: npm ci
+      - name: Build website
+        run: npm run build
+      - name: publish js file
+        id: publish                 #give any value as ID
+        run: find dist/assets/*.js -type f -execdir echo 'script-file={}' >>$GITHUB_OUTPUT ';'  #command to find only .js file and pass that value to github output
+
+
+Declare in other job:
+
+      - name: Getting files
+        run: echo ${{ needs.build.outputs.script-file }}
+
+
+
+Dependency caching:
+Installing dependencies in each job will take more time, so we can cache the dependency in jobs it will use same cache for other jobs
+
+
+      - name: Saving cache
+        uses: actions/cache@v4
+        with:
+          path: ~/.npm           # path where we are caching data.
+          key: tejas-mk-${{ hashFiles('**/package-lock.json') }}
+
+Tejas-mk is string reference we can give any value, hashFiles is a function which will check If any changes in package-lock.json file where we have all dependencies. If any changes in that file then hashFiles function will discard cache and restore.
+
+Mention above code snippet in all the jobs before dependencies.
